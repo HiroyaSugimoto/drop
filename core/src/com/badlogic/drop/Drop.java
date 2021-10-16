@@ -25,22 +25,11 @@ public class Drop extends ApplicationAdapter {
     private Array<Rectangle> raindrops;
     private long lastDropTime; //最後に雨粒が発生した時間を記録しておくため
 
-    private void spawnRaindrop() {
-        Rectangle raindrop = new Rectangle();
-        raindrop.x = MathUtils.random(0, 800 - 64);
-        raindrop.y = 480;
-        raindrop.width = 64;
-        raindrop.height = 64;
-        raindrops.add(raindrop);
-        lastDropTime = TimeUtils.nanoTime();
-    }
-
     @Override
     public void create () {
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
-
         batch = new SpriteBatch();
 
         //ドロップレットとバケットの画像をそれぞれ64x64ピクセルでロードします
@@ -59,21 +48,35 @@ public class Drop extends ApplicationAdapter {
 
     }
 
+    //雨粒を生成するメソッド
+    private void spawnRaindrop() {
+        Rectangle raindrop = new Rectangle();
+        raindrop.x = MathUtils.random(0, 800 - 64);
+        raindrop.y = 480;
+        raindrop.width = 64;
+        raindrop.height = 64;
+        raindrops.add(raindrop);
+        lastDropTime = TimeUtils.nanoTime();
+    }
+
     @Override
     public void render () {
+        //スクリーンの色を指定
         ScreenUtils.clear(0, 0, 0.2f, 1);
 
         camera.update();
+
         batch.setProjectionMatrix(camera.combined);
+
+        //batchを開始して、バケツと雨粒を描画する
         batch.begin();
         batch.draw(bucketImage, bucket.x, bucket.y);
         for(Rectangle raindrop: raindrops) {
             batch.draw(dropImage, raindrop.x, raindrop.y);
-
         }
-
         batch.end();
 
+        //キー入力による操作設定
         if(Gdx.input.isTouched()) {
             Vector3 touchPos = new Vector3();
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -84,6 +87,7 @@ public class Drop extends ApplicationAdapter {
         if(Gdx.input.isKeyPressed(Keys.LEFT))bucket.x -= 200 * Gdx.graphics.getDeltaTime();
         if(Gdx.input.isKeyPressed(Keys.RIGHT))bucket.x += 200 * Gdx.graphics.getDeltaTime();
 
+        //バケツが画面外にはみ出さないようにする処理
         if(bucket.x < 0) bucket.x = 0;
         if(bucket.x > 800 - 64) bucket.x = 800 - 64;
 
@@ -109,9 +113,8 @@ public class Drop extends ApplicationAdapter {
 
     @Override
     public void dispose () {
-        /*
+        dropImage.dispose();
+        bucketImage.dispose();
         batch.dispose();
-        img.dispose();
-        */
     }
 }
